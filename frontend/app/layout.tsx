@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import ThemeProvider from '@/components/ThemeProvider';
+import SWRProvider from '@/components/SWRProvider';
 import { Toaster } from 'react-hot-toast';
 import { assertEnvValid } from '@/lib/env';
 
@@ -33,8 +34,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('astera-theme');var m=window.matchMedia('(prefers-color-scheme: light)').matches;if(t==='light'||(t===null&&m))document.documentElement.classList.add('light');})()`,
+          }}
+        />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#ffffff" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -52,13 +58,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to main content
         </a>
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider>
-            <Navbar />
-            <main id="main-content" role="main">
-              {children}
-            </main>
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
-          </ThemeProvider>
+          <SWRProvider>
+            <ThemeProvider>
+              <Navbar />
+              <main id="main-content" role="main">
+                {children}
+              </main>
+              <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
+            </ThemeProvider>
+          </SWRProvider>
         </NextIntlClientProvider>
       </body>
     </html>

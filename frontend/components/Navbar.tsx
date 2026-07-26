@@ -93,8 +93,8 @@ export default function Navbar() {
   return (
     <>
       <NetworkMismatchBanner />
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-brand-border bg-brand-dark/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-brand-border bg-brand-dark/80 backdrop-blur-md overflow-x-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 sm:gap-8">
           <Link href="/" className="font-bold text-xl tracking-tight">
             <span className="gradient-text">Astera</span>
           </Link>
@@ -105,6 +105,13 @@ export default function Navbar() {
               <Link
                 key={l.href}
                 href={l.href}
+                data-onboarding-id={
+                  l.href === '/invoice/new'
+                    ? 'nav-invoice'
+                    : l.href === '/invest'
+                      ? 'nav-invest'
+                      : undefined
+                }
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   path === l.href
                     ? 'bg-brand-gold/10 text-brand-gold'
@@ -155,7 +162,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile: theme toggle + hamburger */}
-          <div className="md:hidden flex items-center gap-1">
+          <div className="md:hidden flex items-center gap-1 shrink-0">
             <LanguageSelector />
             <ThemeToggle />
             <button
@@ -235,6 +242,13 @@ export default function Navbar() {
                 <Link
                   key={l.href}
                   href={l.href}
+                  data-onboarding-id={
+                    l.href === '/invoice/new'
+                      ? 'nav-invoice'
+                      : l.href === '/invest'
+                        ? 'nav-invest'
+                        : undefined
+                  }
                   className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors min-h-[44px] flex items-center ${
                     path === l.href
                       ? 'bg-brand-gold/10 text-brand-gold'

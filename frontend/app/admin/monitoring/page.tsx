@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import GlossaryTerm from '@/components/GlossaryTerm';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,8 +28,16 @@ interface StorageHealth {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STROOPS_PER_XLM = 10_000_000n;
-// Rough XLM/USDC rate — replace with oracle feed in production
-const XLM_USDC_RATE = 0.11;
+// XLM/USDC rate — configurable via NEXT_PUBLIC_XLM_USDC_RATE env var.
+// Falls back to pool's exchange rate if available, else '--'.
+const XLM_USDC_RATE: number | null = (() => {
+  const env = process.env.NEXT_PUBLIC_XLM_USDC_RATE;
+  if (env) {
+    const parsed = parseFloat(env);
+    if (!isNaN(parsed) && parsed > 0) return parsed;
+  }
+  return null;
+})();
 const LEDGERS_PER_MONTH = 518_400n;
 const STROOPS_PER_LEDGER_PER_ENTRY = 1n;
 
@@ -36,8 +45,8 @@ function stroopsToXlm(stroops: bigint): number {
   return Number(stroops) / Number(STROOPS_PER_XLM);
 }
 
-function xlmToUsdc(xlm: number): number {
-  return xlm * XLM_USDC_RATE;
+function xlmToUsdc(xlm: number): number | null {
+  return XLM_USDC_RATE !== null ? xlm * XLM_USDC_RATE : null;
 }
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
@@ -346,23 +355,30 @@ export default function StorageMonitoringPage() {
                   <span className="text-lg text-slate-500 ml-2">XLM</span>
                 </p>
                 <p className="text-sm text-slate-500 mt-1 font-mono">
-                  ≈ ${costUsdc.toFixed(4)} USDC
+                  {costUsdc !== null ? `≈ $${costUsdc.toFixed(4)} USDC` : '≈ -- USDC'}
                 </p>
               </div>
 
               <div className="text-xs text-slate-600 font-mono leading-relaxed">
                 <p>{health.stats.active_invoices.toLocaleString()} active entries</p>
-                <p>× 1 stroop / ledger / entry</p>
-                <p>× {LEDGERS_PER_MONTH.toLocaleString()} ledgers / month</p>
+                <p>
+                  × 1 <GlossaryTerm id="stroops">stroop</GlossaryTerm> /{' '}
+                  <GlossaryTerm id="ledger" /> / entry
+                </p>
+                <p>
+                  × {LEDGERS_PER_MONTH.toLocaleString()}{' '}
+                  <GlossaryTerm id="ledger">ledgers</GlossaryTerm> / month
+                </p>
                 <p className="text-slate-500 mt-1">
-                  ÷ {STROOPS_PER_XLM.toLocaleString()} stroops / XLM
+                  ÷ {STROOPS_PER_XLM.toLocaleString()} <GlossaryTerm id="stroops" /> / XLM
                 </p>
               </div>
             </div>
 
             <p className="text-[11px] text-slate-600">
-              Approximation — actual costs vary with entry size, TTL settings, and network fee
-              schedules. XLM/USDC rate: ${XLM_USDC_RATE}.
+              Approximation — actual costs vary with entry size,{' '}
+              <GlossaryTerm id="ttl">TTL</GlossaryTerm> settings, and network fee schedules.
+              XLM/USDC rate: ${XLM_USDC_RATE !== null ? `$${XLM_USDC_RATE.toFixed(2)}` : '--'}.
             </p>
           </div>
         )}

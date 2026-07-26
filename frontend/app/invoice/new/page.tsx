@@ -1,25 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useStore } from '@/lib/store';
-import { buildCreateInvoiceTx, submitTx } from '@/lib/contracts';
+import { buildCreateInvoiceTx, submitTx, getMaxInvoiceAmount } from '@/lib/contracts';
 import { toStroops } from '@/lib/stellar';
+import GlossaryTerm from '@/components/GlossaryTerm';
 
 const MIN_AMOUNT = 10;
-const MAX_AMOUNT = 1_000_000;
+const DEFAULT_MAX_AMOUNT = 1_000_000;
 const MAX_DUE_DAYS = 365;
 const MAX_DESCRIPTION_LEN = 256;
 
-function validateForm(form: {
-  debtor: string;
-  amount: string;
-  dueDate: string;
-  description: string;
-  metadataUri: string;
-}) {
+function validateForm(
+  form: {
+    debtor: string;
+    amount: string;
+    dueDate: string;
+    description: string;
+    metadataUri: string;
+  },
+  maxAmount: number,
+) {
   const errors: Record<string, string> = {};
 
   // Debtor
@@ -40,8 +44,8 @@ function validateForm(form: {
     errors.amount = 'Amount must be a positive number.';
   } else if (amount < MIN_AMOUNT) {
     errors.amount = `Minimum invoice amount is $${MIN_AMOUNT} USDC.`;
-  } else if (amount > MAX_AMOUNT) {
-    errors.amount = `Maximum invoice amount is $${MAX_AMOUNT.toLocaleString()} USDC.`;
+  } else if (amount > maxAmount) {
+    errors.amount = `Maximum invoice amount is $${maxAmount.toLocaleString()} USDC.`;
   }
 
   // Due date
@@ -92,8 +96,15 @@ export default function NewInvoicePage() {
   });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
+  const [maxAmount, setMaxAmount] = useState(DEFAULT_MAX_AMOUNT);
 
-  const errors = validateForm(form);
+  useEffect(() => {
+    getMaxInvoiceAmount()
+      .then((amount) => setMaxAmount(amount))
+      .catch(() => setMaxAmount(DEFAULT_MAX_AMOUNT));
+  }, []);
+
+  const errors = validateForm(form, maxAmount);
   const isValid = Object.keys(errors).length === 0;
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
@@ -153,9 +164,13 @@ export default function NewInvoicePage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-1">Tokenize Invoice</h1>
           <p className="text-brand-muted">
-            Mint your unpaid invoice as a Soroban RWA token to access instant liquidity.
+            Mint your unpaid invoice as a <GlossaryTerm id="soroban" /> RWA token to access instant
+            liquidity.
           </p>
-          <Link href="/invoice/import" className="text-sm text-brand-gold hover:underline mt-2 inline-block">
+          <Link
+            href="/invoice/import"
+            className="text-sm text-brand-gold hover:underline mt-2 inline-block"
+          >
             Import multiple invoices via CSV
           </Link>
         </div>
@@ -186,7 +201,7 @@ export default function NewInvoicePage() {
                     type="number"
                     name="amount"
                     min={MIN_AMOUNT}
-                    max={MAX_AMOUNT}
+                    max={maxAmount}
                     step="0.01"
                     placeholder="0.00"
                     value={form.amount}
@@ -201,6 +216,9 @@ export default function NewInvoicePage() {
                   </span>
                 </div>
                 <ErrorMsg message={touched.amount ? errors.amount : undefined} />
+                <p className="text-xs text-brand-muted mt-1">
+                  Max: ${maxAmount.toLocaleString()} USDC (synced from contract)
+                </p>
               </div>
 
               {/* Due Date */}
@@ -237,7 +255,9 @@ export default function NewInvoicePage() {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   className={`w-full bg-brand-dark border rounded-xl px-4 py-3 text-white placeholder-brand-muted focus:outline-none focus:border-brand-gold resize-none ${
-                    touched.description && errors.description ? 'border-red-500' : 'border-brand-border'
+                    touched.description && errors.description
+                      ? 'border-red-500'
+                      : 'border-brand-border'
                   }`}
                 />
                 <ErrorMsg message={touched.description ? errors.description : undefined} />

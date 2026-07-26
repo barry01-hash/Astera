@@ -267,6 +267,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "compliance"
+version = "0.1.0"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
 name = "const-oid"
 version = "0.9.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -713,6 +720,7 @@ dependencies = [
 name = "governance"
 version = "0.1.0"
 dependencies = [
+ "share",
  "soroban-sdk",
 ]
 
@@ -851,6 +859,14 @@ name = "indexmap-nostd"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8e04e2fd2b8188ea827b32ef11de88377086d690286ab35747ef7f9bf3ccb590"
+
+[[package]]
+name = "insurance"
+version = "0.1.0"
+dependencies = [
+ "proptest",
+ "soroban-sdk",
+]
 
 [[package]]
 name = "integration-tests"
@@ -1003,6 +1019,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
 
 [[package]]
+name = "oracle_registry"
+version = "0.1.0"
+dependencies = [
+ "proptest",
+ "soroban-sdk",
+]
+
+[[package]]
 name = "p256"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1040,7 +1064,9 @@ dependencies = [
 name = "pool"
 version = "0.1.0"
 dependencies = [
+ "compliance",
  "proptest",
+ "referral",
  "soroban-sdk",
 ]
 
@@ -1219,6 +1245,13 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.117",
+]
+
+[[package]]
+name = "referral"
+version = "0.1.0"
+dependencies = [
+ "soroban-sdk",
 ]
 
 [[package]]
@@ -1419,6 +1452,7 @@ dependencies = [
 name = "share"
 version = "0.1.0"
 dependencies = [
+ "proptest",
  "soroban-sdk",
 ]
 

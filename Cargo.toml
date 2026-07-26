@@ -1,10 +1,13 @@
 [workspace]
 members = [
     "contracts/invoice",
-    "contracts/pool", 
+    "contracts/pool",
     "contracts/credit_score",
     "contracts/share",
     "contracts/governance",
+    "contracts/oracle_registry",
+    "contracts/compliance",
+    "contracts/referral",
     "contracts/tests",
     "benchmarks",
 ]
